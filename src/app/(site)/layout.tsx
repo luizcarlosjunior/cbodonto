@@ -1,4 +1,8 @@
 // src/app/(site)/layout.tsx
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return (
+    <div className="max-w-[1600px] mx-auto relative shadow-[0_0_80px_rgba(0,0,0,0.08)]">
+      {children}
+    </div>
+  )
 }

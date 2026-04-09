@@ -145,32 +145,48 @@ interface PatientParams {
 export function getCachedPatients(params: PatientParams) {
   const key = `patients-${JSON.stringify(params)}`
   return unstable_cache(
-    () => {
-      const limit = 20
-      const where = params.search
-        ? {
-            OR: [
-              { name: { contains: params.search, mode: 'insensitive' as const } },
-              { phone: { contains: params.search } },
-              { email: { contains: params.search, mode: 'insensitive' as const } },
-              { cpf: { contains: params.search } },
-            ],
-          }
-        : {}
-      return Promise.all([
-        db.patient.findMany({
-          where,
-          include: { _count: { select: { appointments: true } } },
-          orderBy: { name: 'asc' },
-          skip: (params.page - 1) * limit,
-          take: limit,
-        }),
-        db.patient.count({ where }),
-      ])
-    },
+    () => queryPatients(params),
     [key],
     { tags: [TAGS.patients] },
   )()
+}
+
+// Exported so the API route can call it directly (bypassing cache) when searching
+export function queryPatients(params: PatientParams) {
+  const limit = 20
+  const where = buildPatientWhere(params.search)
+  return Promise.all([
+    db.patient.findMany({
+      where,
+      include: { _count: { select: { appointments: true } } },
+      orderBy: { name: 'asc' },
+      skip: (params.page - 1) * limit,
+      take: limit,
+    }),
+    db.patient.count({ where }),
+  ])
+}
+
+function buildPatientWhere(search?: string) {
+  if (!search) return {}
+
+  // Strip formatting so "041 9999-0000" matches "41999990000", etc.
+  const digitsOnly = search.replace(/\D/g, '')
+
+  const clauses: any[] = [
+    { name: { contains: search } },
+    { email: { contains: search } },
+    { phone: { contains: search } },
+    { cpf: { contains: search } },
+  ]
+
+  // Also search digits-only version for phone and CPF
+  if (digitsOnly && digitsOnly !== search) {
+    clauses.push({ phone: { contains: digitsOnly } })
+    clauses.push({ cpf: { contains: digitsOnly } })
+  }
+
+  return { OR: clauses }
 }
 
 export function getCachedPatient(id: string) {

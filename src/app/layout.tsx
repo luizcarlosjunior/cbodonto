@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" className={`${cormorant.variable} ${dmSans.variable}`}>
       <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
-      <body className="font-sans bg-cream text-stone-800 antialiased">{children}</body>
+      <body className="font-sans bg-cream text-stone-800 antialiased overflow-x-hidden">{children}</body>
     </html>
   )
 }

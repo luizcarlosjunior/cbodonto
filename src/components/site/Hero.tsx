@@ -25,7 +25,10 @@ export default function Hero({ waNumber }: { waNumber: string }) {
   })
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
+    <section
+      className="relative min-h-screen flex items-center overflow-hidden"
+      style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}
+    >
 
       {/* ── Full-bleed background image ── */}
       <div className="absolute inset-0 z-0">
@@ -54,8 +57,9 @@ export default function Hero({ waNumber }: { waNumber: string }) {
         </div> */}
       </div>
 
-      {/* ── Main content ── */}
-      <div className="relative z-10 w-full px-6 md:px-[8%] pt-28 pb-32 md:pt-36 md:pb-40">
+
+      {/* ── Main content — constrained to site container ── */}
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-[8%] pt-28 pb-32 md:pt-36 md:pb-40">
         <div className="max-w-3xl">
 
           {/* Eyebrow */}
@@ -64,10 +68,9 @@ export default function Hero({ waNumber }: { waNumber: string }) {
             style={fadeUpStyle(100)}
           >
             <span className="block h-px w-8 bg-gold" />
-            
           </p>
 
-          {/* Headline — mirrors Concept HOF's large serif treatment */}
+          {/* Headline */}
           <h1
             className={`font-serif font-light text-white leading-[1.05] mb-4 ${fadeUp(200)}`}
             style={{ ...fadeUpStyle(200), fontSize: 'clamp(2.6rem, 6vw, 5.5rem)' }}
@@ -119,12 +122,12 @@ export default function Hero({ waNumber }: { waNumber: string }) {
         </div>
       </div>
 
-      {/* ── Bottom info strip — like Concept HOF's footer bar ── */}
+      {/* ── Bottom info strip ── */}
       <div
         className={`absolute bottom-0 left-0 right-0 z-10 border-t border-white/10 backdrop-blur-sm bg-stone-950/40 ${fadeUp(600)}`}
         style={fadeUpStyle(600)}
       >
-        <div className="flex flex-col sm:flex-row items-center justify-between px-6 md:px-[8%] py-4 gap-3">
+        <div className="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between px-6 md:px-[8%] py-4 gap-3">
           {[
             { num: '2+', label: 'Anos de Experiência' },
             { num: '500+', label: 'Pacientes Atendidos' },
@@ -155,6 +158,7 @@ export default function Hero({ waNumber }: { waNumber: string }) {
           50% { opacity: 1; transform: scaleY(1) translateY(0); }
         }
       `}</style>
+
     </section>
   )
 }

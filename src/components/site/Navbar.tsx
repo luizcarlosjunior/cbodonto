@@ -34,12 +34,13 @@ export default function Navbar({ waNumber }: NavbarProps) {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[5%] py-4 transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isLight
             ? 'bg-cream/95 backdrop-blur-md shadow-sm border-b border-gold/20'
             : 'bg-transparent'
         }`}
       >
+        <div className="max-w-[1700px] mx-auto flex items-center justify-between px-[5%] py-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
           <svg id="logo" width="50" height="50" viewBox="0 0 500 500">
@@ -96,6 +97,7 @@ export default function Navbar({ waNumber }: NavbarProps) {
         >
           <Menu size={22} />
         </button>
+        </div>
       </nav>
 
       {/* Mobile full-screen menu */}

@@ -4,7 +4,7 @@ import { revalidateTag } from 'next/cache'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { getCachedPatients, TAGS } from '@/lib/cache'
+import { getCachedPatients, queryPatients, TAGS } from '@/lib/cache'
 import { z } from 'zod'
 
 const nullableStr = z.string().optional().nullable().transform((v) => v || null)
@@ -37,7 +37,8 @@ export async function GET(req: NextRequest) {
   }
 
   const limit = 20
-  const [patients, total] = await getCachedPatients(params)
+  // Bypass cache when searching so results are always fresh
+  const [patients, total] = await (params.search ? queryPatients(params) : getCachedPatients(params))
 
   return NextResponse.json({ patients, total, page: params.page, pages: Math.ceil(total / limit) })
 }
