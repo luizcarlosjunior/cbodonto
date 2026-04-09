@@ -1,0 +1,60 @@
+/* src/app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.25rem;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-cream text-stone-800;
+  }
+}
+
+@layer components {
+  .section-tag {
+    @apply flex items-center gap-2 text-xs tracking-widest uppercase text-burgundy font-sans font-medium;
+  }
+  .section-tag::before {
+    content: '';
+    @apply block w-7 h-px bg-burgundy flex-shrink-0;
+  }
+  .section-title {
+    @apply font-serif text-3xl md:text-4xl font-light leading-tight text-stone-900;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-burgundy text-white px-6 py-3 text-xs tracking-widest uppercase font-medium transition-all hover:bg-burgundy-light hover:-translate-y-px rounded-sm;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 border border-gold text-stone-800 px-6 py-3 text-xs tracking-widest uppercase font-medium transition-all hover:border-burgundy hover:text-burgundy rounded-sm;
+  }
+  .btn-outline {
+    @apply inline-flex items-center gap-2 border border-stone-300 text-stone-600 px-4 py-2 text-xs tracking-wider uppercase font-medium transition-all hover:border-burgundy hover:text-burgundy rounded-sm;
+  }
+
+  /* Admin form elements */
+  .admin-label {
+    @apply block text-[0.7rem] tracking-widest uppercase text-stone-500 mb-1.5;
+  }
+  .admin-input {
+    @apply w-full border border-stone-200 px-3 py-2.5 text-sm focus:outline-none focus:border-burgundy bg-white rounded-none;
+  }
+  .admin-input:focus {
+    @apply border-burgundy;
+  }
+  select.admin-input {
+    @apply appearance-none cursor-pointer;
+  }
+}
+
+/* Admin scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { @apply bg-stone-100; }
+::-webkit-scrollbar-thumb { @apply bg-stone-300 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-stone-400; }
