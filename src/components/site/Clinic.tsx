@@ -1,6 +1,6 @@
 // src/components/site/Clinic.tsx
+import { Cpu, Sparkles, Users } from 'lucide-react'
 import Image from 'next/image'
-import { Sparkles, Cpu, Users } from 'lucide-react'
 
 const features = [
   {
@@ -21,10 +21,10 @@ const features = [
 ]
 
 const photos = [
-  { src: '/clinica/clinica-1.jpg', alt: 'Recepção da CB Odonto' },
-  { src: '/clinica/clinica-2.jpg', alt: 'Sala de atendimento' },
-  { src: '/clinica/clinica-3.jpg', alt: 'Equipamentos modernos' },
-  { src: '/clinica/clinica-4.jpg', alt: 'Ambiente da clínica' },
+  { src: '/img1.jpeg', alt: 'Consultório' },
+  { src: '/img2.jpeg', alt: 'Clareamento' },
+  { src: '/img3.jpeg', alt: 'Butox' },
+  { src: '/img4.jpeg', alt: 'Preenchimento Labial' },
 ]
 
 export default function Clinic() {
@@ -46,7 +46,7 @@ export default function Clinic() {
         {/* Photo grid */}
         <div className="grid grid-cols-2 gap-3">
           {/* Large photo — spans 2 rows */}
-          <div className="row-span-2 relative aspect-[3/4] overflow-hidden rounded-sm bg-stone-100">
+          <div className="row-span-1 relative aspect-[3/4] overflow-hidden rounded-sm bg-stone-100">
             <Image
               src={photos[0].src}
               alt={photos[0].alt}
@@ -57,7 +57,7 @@ export default function Clinic() {
           </div>
           {/* 3 smaller photos */}
           {photos.slice(1).map((p) => (
-            <div key={p.src} className="relative aspect-square overflow-hidden rounded-sm bg-stone-100">
+            <div key={p.src} className="relative aspect-[3/4] overflow-hidden rounded-sm bg-stone-100">
               <Image
                 src={p.src}
                 alt={p.alt}

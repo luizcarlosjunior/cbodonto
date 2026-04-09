@@ -4,7 +4,7 @@ import { waLink } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 
 // Unsplash placeholder — troque por /hero-bg.jpg quando tiver a imagem definitiva
-const HERO_IMAGE = 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=1400&q=80&auto=format&fit=crop'
+const HERO_IMAGE = 'bg3.avif'
 
 export default function Hero({ waNumber }: { waNumber: string }) {
   const [mounted, setMounted] = useState(false)

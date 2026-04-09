@@ -1,9 +1,9 @@
 'use client'
 // src/components/site/Services.tsx
-import { useState } from 'react'
-import Image from 'next/image'
-import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { waLink } from '@/lib/utils'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
+import Image from 'next/image'
+import { useState } from 'react'
 
 interface ServiceImage {
   id: string
@@ -217,7 +217,7 @@ export default function Services({ waNumber, services }: Props) {
         {hasMore && (
           <div className="text-center mt-8">
             <button onClick={() => setShowAll((v) => !v)} className="btn-outline">
-              {showAll ? '← Ver menos' : `Ver todos os ${services.length} tratamentos →`}
+              {showAll ? '← Ver menos' : `Ver mais tratamentos →`}
             </button>
           </div>
         )}
