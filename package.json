@@ -47,11 +47,11 @@
     "vercel": "^50.42.0",
     "zod": "^3.22.4",
     "autoprefixer": "^10.0.1",
-    "postcss": "^8"
+    "postcss": "^8",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "prisma": "^7.0.0",
