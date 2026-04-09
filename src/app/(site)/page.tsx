@@ -33,9 +33,9 @@ export default async function HomePage() {
         <Clinic />
         <BookingSection dentists={dentists} />
         <Testimonials testimonials={testimonials} />
-        <Location waNumber={waNumber} />
+        <Location settings={settings} />
       </main>
-      <Footer waNumber={waNumber} />
+      <Footer settings={settings} />
       <WhatsAppFloat waNumber={waNumber} />
     </>
   )

@@ -6,6 +6,7 @@ export const TAGS = {
   stats: 'stats',
   settings: 'settings',
   services: 'services',
+  pages: 'pages',
 } as const
 
 export const ALL_TAGS = Object.values(TAGS)

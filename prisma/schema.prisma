@@ -31,6 +31,8 @@ model Dentist {
   cro       String
   bio       String?  @db.Text
   photoUrl  String?
+  email     String?
+  phone     String?
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -162,12 +164,32 @@ model ServiceImage {
   updatedAt DateTime @updatedAt
 }
 
+model Page {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  seoTitle    String?
+  seoDesc     String?  @db.Text
+  seoTags     String?  @db.Text
+  content     String?  @db.LongText
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model SiteSettings {
-  id             String   @id @default(cuid())
-  whatsappNumber String   @default("5541997234253")
-  address        String
-  openHours      String
-  instagramUrl   String?
-  facebookUrl    String?
-  updatedAt      DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  whatsappNumber       String   @default("5541997234253")
+  address              String?  // Deprecated in favor of addressLine1/2
+  addressLine1         String?
+  addressLine2         String?
+  cnpj                 String?
+  legalName            String?  // Razão Social
+  tradeName            String?  // Nome Fantasia
+  footerText           String?  @db.Text
+  customerServiceEmail String?
+  openHours            String
+  instagramUrl         String?
+  facebookUrl          String?
+  updatedAt            DateTime @updatedAt
 }

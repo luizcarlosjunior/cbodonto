@@ -1,21 +1,19 @@
-// src/app/api/admin/dentists/route.ts
+// src/app/api/admin/pages/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidateTag } from 'next/cache'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { getCachedAdminDentists, TAGS } from '@/lib/cache'
+import { getCachedAdminPages, TAGS } from '@/lib/cache'
 import { z } from 'zod'
 
 const schema = z.object({
-  name: z.string().min(2),
   title: z.string().min(2),
-  specialty: z.string().optional(),
-  cro: z.string().min(2),
-  bio: z.string().optional(),
-  photoUrl: z.string().optional(),
-  email: z.string().email().optional().or(z.literal('')),
-  phone: z.string().optional(),
+  slug: z.string().min(2).regex(/^[a-z0-9-]+$/, 'Slug deve conter apenas letras minúsculas, números e hífens'),
+  seoTitle: z.string().optional(),
+  seoDesc: z.string().optional(),
+  seoTags: z.string().optional(),
+  content: z.string().optional(),
   active: z.boolean().default(true),
 })
 
@@ -23,8 +21,8 @@ export async function GET() {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-  const dentists = await getCachedAdminDentists()
-  return NextResponse.json(dentists)
+  const pages = await getCachedAdminPages()
+  return NextResponse.json(pages)
 }
 
 export async function POST(req: NextRequest) {
@@ -34,9 +32,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const data = schema.parse(body)
-    const dentist = await db.dentist.create({ data })
-    revalidateTag(TAGS.dentists)
-    return NextResponse.json(dentist, { status: 201 })
+    const page = await db.page.create({ data })
+    revalidateTag(TAGS.pages)
+    return NextResponse.json(page, { status: 201 })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 })
   }

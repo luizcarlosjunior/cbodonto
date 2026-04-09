@@ -225,14 +225,45 @@ export const getCachedStats = unstable_cache(
   { tags: [TAGS.stats, TAGS.appointments, TAGS.patients, TAGS.testimonials], revalidate: 300 },
 )
 
+// ─── Admin – páginas ──────────────────────────────────────────────────────────
+
+export const getCachedAdminPages = unstable_cache(
+  () => db.page.findMany({ orderBy: { updatedAt: 'desc' } }),
+  ['admin-pages'],
+  { tags: [TAGS.pages] },
+)
+
+export function getCachedPageBySlug(slug: string) {
+  return unstable_cache(
+    () => db.page.findFirst({ where: { slug, active: true } }),
+    [`page-${slug}`],
+    { tags: [TAGS.pages] },
+  )()
+}
+
+export const getCachedActivePageSlugs = unstable_cache(
+  () => db.page.findMany({ where: { active: true }, select: { slug: true } }),
+  ['active-page-slugs'],
+  { tags: [TAGS.pages] },
+)
+
 // ─── Site settings ────────────────────────────────────────────────────────────
 
 const SETTINGS_DEFAULTS = {
+  id: '',
   whatsappNumber: '5541997234253',
-  address: '',
+  address: null as string | null,
+  addressLine1: null as string | null,
+  addressLine2: null as string | null,
+  cnpj: null as string | null,
+  legalName: null as string | null,
+  tradeName: null as string | null,
+  footerText: null as string | null,
+  customerServiceEmail: null as string | null,
   openHours: '',
   instagramUrl: null as string | null,
   facebookUrl: null as string | null,
+  updatedAt: new Date(),
 }
 
 export const getCachedSiteSettings = unstable_cache(

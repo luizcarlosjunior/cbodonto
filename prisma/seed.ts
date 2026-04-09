@@ -412,6 +412,13 @@ async function main() {
       id: 'main',
       whatsappNumber: '5541997234253',
       address: 'R. Casemiro de Abreu, 238 – Maracanã, Colombo – PR, 83409-070',
+      addressLine1: 'R. Casemiro de Abreu, 238 – Maracanã',
+      addressLine2: 'Colombo – PR, 83409-070',
+      cnpj: '00.000.000/0001-00',
+      legalName: 'Campozano & Barcellos Odontologia Ltda',
+      tradeName: 'CB Odonto',
+      footerText: 'Transformando sorrisos com excelência e cuidado.',
+      customerServiceEmail: 'atendimento@cbodonto.com.br',
       openHours: 'Segunda a Sexta: 08h – 18h',
     },
   })

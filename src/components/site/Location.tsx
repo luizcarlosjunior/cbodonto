@@ -1,7 +1,22 @@
 // src/components/site/Location.tsx
 import { waLink } from '@/lib/utils'
 
-export default function Location({ waNumber }: { waNumber: string }) {
+interface LocationProps {
+  settings: {
+    whatsappNumber: string
+    addressLine1?: string | null
+    addressLine2?: string | null
+    openHours?: string | null
+  }
+}
+
+export default function Location({ settings }: LocationProps) {
+  const { whatsappNumber: waNumber, addressLine1, addressLine2, openHours } = settings
+
+  const addressText = addressLine1 && addressLine2 
+    ? `${addressLine1}\n${addressLine2}`
+    : settings.addressLine1 || 'R. Casemiro de Abreu, 238 – Maracanã\nColombo – PR, 83409-070'
+
   return (
     <section id="localizacao" className="bg-stone-900 grid md:grid-cols-2 min-h-[480px]">
       <div className="py-16 px-[8%] flex flex-col justify-center">
@@ -13,7 +28,7 @@ export default function Location({ waNumber }: { waNumber: string }) {
         {[
           {
             label: 'Endereço',
-            text: 'R. Casemiro de Abreu, 238 – Maracanã\nColombo – PR, 83409-070',
+            text: addressText,
             icon: (
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0" />
             ),
@@ -28,7 +43,7 @@ export default function Location({ waNumber }: { waNumber: string }) {
           },
           {
             label: 'Horário de Atendimento',
-            text: 'Segunda a Sexta: 08h – 18h\nSábado: mediante agendamento',
+            text: openHours || 'Segunda a Sexta: 08h – 18h\nSábado: mediante agendamento',
             icon: (
               <>
                 <circle cx="12" cy="12" r="10" />

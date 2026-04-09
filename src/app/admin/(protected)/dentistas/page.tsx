@@ -1,7 +1,8 @@
 'use client'
 // src/app/admin/dentistas/page.tsx
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, UserCheck, UserX, Calendar } from 'lucide-react'
+import { Plus, UserCheck, UserX, Calendar, Mail, Phone } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import DentistModal from '@/components/admin/DentistModal'
 
@@ -43,21 +44,55 @@ export default function DentistasPage() {
         <div className="grid md:grid-cols-2 gap-4">
           {dentists.map((d) => (
             <div key={d.id} className="bg-white border border-stone-200 p-6 hover:border-stone-300 transition-colors">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <h3 className="font-serif text-xl text-stone-900">{d.name}</h3>
-                    {d.active
-                      ? <UserCheck size={14} className="text-emerald-500" />
-                      : <UserX size={14} className="text-red-400" />
-                    }
-                  </div>
-                  <p className="text-stone-400 text-xs tracking-wide">{d.title} · {d.cro}</p>
-                  {d.specialty && <p className="text-stone-500 text-xs mt-1">{d.specialty}</p>}
+              <div className="flex items-start gap-4 mb-4">
+                {/* Photo */}
+                <div className="w-14 h-14 shrink-0 rounded-full overflow-hidden bg-stone-100 border border-stone-200">
+                  {d.photoUrl ? (
+                    <Image src={d.photoUrl} alt={d.name} width={56} height={56} className="object-cover w-full h-full" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-stone-300">
+                      <UserCheck size={24} />
+                    </div>
+                  )}
                 </div>
-                <span className={`text-[0.6rem] px-2 py-0.5 rounded-full tracking-wide font-medium ${d.active ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500'}`}>
-                  {d.active ? 'Ativo' : 'Inativo'}
-                </span>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="font-serif text-xl text-stone-900">{d.name}</h3>
+                        {d.active
+                          ? <UserCheck size={14} className="text-emerald-500" />
+                          : <UserX size={14} className="text-red-400" />
+                        }
+                      </div>
+                      <p className="text-stone-400 text-xs tracking-wide">{d.title} · {d.cro}</p>
+                      {d.specialty && <p className="text-stone-500 text-xs mt-1">{d.specialty}</p>}
+                    </div>
+                    <span className={`shrink-0 text-[0.6rem] px-2 py-0.5 rounded-full tracking-wide font-medium ${d.active ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500'}`}>
+                      {d.active ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </div>
+
+                  {/* Contact info */}
+                  {(d.email || d.phone) && (
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                      {d.email && (
+                        <a href={`mailto:${d.email}`} className="flex items-center gap-1 text-xs text-stone-400 hover:text-burgundy transition-colors">
+                          <Mail size={11} />
+                          <span className="truncate max-w-[160px]">{d.email}</span>
+                        </a>
+                      )}
+                      {d.phone && (
+                        <a href={`tel:${d.phone}`} className="flex items-center gap-1 text-xs text-stone-400 hover:text-burgundy transition-colors">
+                          <Phone size={11} />
+                          {d.phone}
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Weekly schedule preview */}

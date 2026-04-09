@@ -20,6 +20,8 @@ export default function DentistModal({ data, onClose, onSave }: Props) {
     cro: data?.cro ?? '',
     bio: data?.bio ?? '',
     photoUrl: data?.photoUrl ?? '',
+    email: data?.email ?? '',
+    phone: data?.phone ?? '',
     active: data?.active ?? true,
   })
   const [loading, setLoading] = useState(false)
@@ -114,6 +116,29 @@ export default function DentistModal({ data, onClose, onSave }: Props) {
               className="admin-input"
               placeholder="Ex: Dentística, Ortodontia"
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="admin-label">E-mail</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => set('email', e.target.value)}
+                className="admin-input"
+                placeholder="dentista@exemplo.com"
+              />
+            </div>
+            <div>
+              <label className="admin-label">Telefone / WhatsApp</label>
+              <input
+                type="tel"
+                value={form.phone}
+                onChange={(e) => set('phone', e.target.value)}
+                className="admin-input"
+                placeholder="(41) 99999-0000"
+              />
+            </div>
           </div>
 
           <div>
