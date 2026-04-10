@@ -2,6 +2,7 @@
 // src/app/admin/(protected)/servicos/page.tsx
 import { useState, useEffect, useCallback } from 'react'
 import { Plus, X, Trash2, Pencil, GripVertical, Eye, EyeOff } from 'lucide-react'
+import Pagination from '@/components/admin/Pagination'
 import Image from 'next/image'
 import Switch from '@/components/admin/Switch'
 import PhotoPicker from '@/components/admin/PhotoPicker'
@@ -303,21 +304,32 @@ function ServiceModal({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+const PER_PAGE = 10
+
 export default function ServicosPage() {
   const [services, setServices] = useState<Service[]>([])
+  const [total, setTotal]   = useState(0)
+  const [page, setPage]     = useState(1)
+  const [pages, setPages]   = useState(1)
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState<{ open: boolean; data?: Service }>({ open: false })
   const [dragging, setDragging] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (pg = page) => {
     setLoading(true)
-    const res = await fetch('/api/admin/services')
-    if (res.ok) setServices(await res.json())
+    const res = await fetch(`/api/admin/services?page=${pg}`)
+    if (res.ok) {
+      const data = await res.json()
+      setServices(data.services)
+      setTotal(data.total)
+      setPage(data.page)
+      setPages(data.pages)
+    }
     setLoading(false)
-  }, [])
+  }, [page])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { load() }, [page]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleActive = async (s: Service) => {
     await fetch(`/api/admin/services/${s.id}`, {
@@ -361,7 +373,7 @@ export default function ServicosPage() {
         <div>
           <h1 className="font-serif text-3xl text-stone-900">Serviços</h1>
           <p className="text-stone-500 text-sm mt-0.5">
-            {services.length} total · {services.filter((s) => s.active).length} visíveis · arraste para reordenar
+            {total} total · {services.filter((s) => s.active).length} visíveis nesta página · arraste para reordenar
           </p>
         </div>
         <button onClick={() => setModal({ open: true })} className="btn-primary">
@@ -378,6 +390,7 @@ export default function ServicosPage() {
           Nenhum serviço cadastrado.
         </div>
       ) : (
+        <>
         <div className="space-y-2">
           {services.map((s, i) => (
             <div
@@ -449,6 +462,15 @@ export default function ServicosPage() {
             </div>
           ))}
         </div>
+
+        <Pagination
+          page={page}
+          pages={pages}
+          total={total}
+          perPage={PER_PAGE}
+          onPage={(p) => setPage(p)}
+        />
+        </>
       )}
 
       {modal.open && (

@@ -96,7 +96,7 @@ export default async function AdminDashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-stone-100 bg-stone-50">
-                {['Paciente', 'Dentista', 'Serviço', 'Data', 'Horário', 'Status'].map((h) => (
+                {['Paciente', 'Dentista', 'Serviço', 'Data', 'Horário', 'Status', ''].map((h) => (
                   <th key={h} className="text-left px-6 py-3 text-[0.7rem] tracking-widest uppercase text-stone-400 font-medium">
                     {h}
                   </th>
@@ -105,9 +105,11 @@ export default async function AdminDashboard() {
             </thead>
             <tbody>
               {stats.recentAppointments.map((a) => (
-                <tr key={a.id} className="border-b border-stone-50 hover:bg-stone-50 transition-colors">
+                <tr key={a.id} className="border-b border-stone-50 hover:bg-stone-50 transition-colors group">
                   <td className="px-6 py-3 text-stone-800 font-medium">
-                    {a.patient?.name ?? a.guestName ?? '—'}
+                    <Link href={`/admin/agendamentos/${a.id}`} className="hover:text-burgundy transition-colors">
+                      {a.patient?.name ?? a.guestName ?? '—'}
+                    </Link>
                   </td>
                   <td className="px-6 py-3 text-stone-500">{a.dentist.name.replace('Dr. ', '').replace('Dra. ', '')}</td>
                   <td className="px-6 py-3 text-stone-500 max-w-[140px] truncate">{a.service}</td>
@@ -118,11 +120,16 @@ export default async function AdminDashboard() {
                       {STATUS_LABELS[a.status]}
                     </span>
                   </td>
+                  <td className="px-6 py-3">
+                    <Link href={`/admin/agendamentos/${a.id}`} className="text-xs text-stone-400 hover:text-burgundy transition-colors opacity-0 group-hover:opacity-100">
+                      Ver detalhes →
+                    </Link>
+                  </td>
                 </tr>
               ))}
               {stats.recentAppointments.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-stone-400 text-sm">
+                  <td colSpan={7} className="px-6 py-10 text-center text-stone-400 text-sm">
                     Nenhum agendamento encontrado.
                   </td>
                 </tr>

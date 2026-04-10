@@ -1,6 +1,6 @@
 'use client'
 // src/components/site/BookingSection.tsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { SERVICES, DAY_NAMES_SHORT } from '@/lib/utils'
 import type { Dentist, WeeklySchedule } from '@prisma/client'
@@ -24,6 +24,7 @@ export default function BookingSection({ dentists }: Props) {
   })
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [msg, setMsg] = useState('')
+  const [takenSlots, setTakenSlots] = useState<string[]>([])
 
   const selectedDentist = dentists.find((d) => d.id === form.dentistId)
 
@@ -32,6 +33,15 @@ export default function BookingSection({ dentists }: Props) {
 
   // Get available days for selected dentist
   const availableDays = selectedDentist?.weeklySchedule.map((s) => s.dayOfWeek) ?? []
+
+  // Fetch taken slots when dentist + date change
+  useEffect(() => {
+    if (!form.dentistId || !form.date) { setTakenSlots([]); return }
+    fetch(`/api/slots?dentistId=${form.dentistId}&date=${form.date}`)
+      .then((r) => r.json())
+      .then((d) => setTakenSlots(d.takenSlots ?? []))
+      .catch(() => setTakenSlots([]))
+  }, [form.dentistId, form.date])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,7 +69,7 @@ export default function BookingSection({ dentists }: Props) {
       <div className="grid md:grid-cols-2 gap-14 items-start">
         {/* Left */}
         <div>
-          <p className="section-tag mb-4" style={{ color: '#c4a97d' }}>Agende sua consulta</p>
+          <p className="section-tag mb-4" style={{ color: '#21A8A0' }}>Agende sua consulta</p>
           <h2 className="font-serif text-4xl font-light text-white mb-5">
             Reserve seu <em className="italic text-gold">horário</em>
           </h2>
@@ -201,9 +211,14 @@ export default function BookingSection({ dentists }: Props) {
                   >
                     <option value="">Qualquer horário</option>
                     {['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30',
-                      '13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'].map((t) => (
-                      <option key={t}>{t}</option>
-                    ))}
+                      '13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'].map((t) => {
+                      const taken = takenSlots.includes(t)
+                      return (
+                        <option key={t} value={t} disabled={taken}>
+                          {t}{taken ? ' — Ocupado' : ''}
+                        </option>
+                      )
+                    })}
                   </select>
                 </div>
                 <div className="col-span-2">

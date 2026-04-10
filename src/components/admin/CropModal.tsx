@@ -107,7 +107,7 @@ export default function CropModal({ imageSrc, onConfirm, onCancel }: Props) {
             onCropComplete={onCropComplete}
             style={{
               containerStyle: { borderRadius: 0 },
-              cropAreaStyle: { border: '2px solid #c4a97d', boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)' },
+              cropAreaStyle: { border: '2px solid #21A8A0', boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)' },
             }}
           />
         </div>

@@ -22,7 +22,10 @@ export default function AgendamentosPage() {
 
   const fetchDentists = useCallback(async () => {
     const res = await fetch('/api/admin/dentists')
-    if (res.ok) setDentists(await res.json())
+    if (res.ok) {
+      const data = await res.json()
+      setDentists(data.dentists ?? data)
+    }
   }, [])
 
   const fetchAppointments = useCallback(async () => {

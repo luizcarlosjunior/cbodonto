@@ -10,18 +10,18 @@ module.exports = {
     extend: {
       colors: {
         burgundy: {
-          DEFAULT: '#6b2737',
-          light: '#8a3347',
-          dark: '#4e1c28',
+          DEFAULT: '#21A8A0',
+          light: '#2dbfb7',
+          dark: '#178a83',
         },
         gold: {
-          DEFAULT: '#c4a97d',
-          light: '#e8d9bf',
-          dark: '#a8895a',
+          DEFAULT: '#21A8A0',
+          light: '#7dd8d4',
+          dark: '#178a83',
         },
         cream: {
-          DEFAULT: '#f9f6f1',
-          dark: '#f0ebe2',
+          DEFAULT: '#FFFFFF',
+          dark: '#f2f2f2',
         },
         stone: {
           50: '#fafaf9',

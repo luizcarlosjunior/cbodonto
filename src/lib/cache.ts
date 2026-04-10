@@ -32,15 +32,34 @@ export const getCachedTestimonials = unstable_cache(
 
 // ─── Admin – dentistas ────────────────────────────────────────────────────────
 
-export const getCachedAdminDentists = unstable_cache(
-  () =>
-    db.dentist.findMany({
-      include: { weeklySchedule: true, _count: { select: { appointments: true } } },
-      orderBy: { name: 'asc' },
-    }),
-  ['admin-dentists'],
-  { tags: [TAGS.dentists] },
-)
+interface DentistParams {
+  page: number
+  search?: string
+}
+
+export function getCachedAdminDentists(params: DentistParams) {
+  const key = `admin-dentists-${JSON.stringify(params)}`
+  return unstable_cache(
+    () => {
+      const limit = 12
+      const where: any = params.search
+        ? { OR: [{ name: { contains: params.search } }, { specialty: { contains: params.search } }, { cro: { contains: params.search } }] }
+        : {}
+      return Promise.all([
+        db.dentist.findMany({
+          where,
+          include: { weeklySchedule: true, _count: { select: { appointments: true } } },
+          orderBy: { name: 'asc' },
+          skip: (params.page - 1) * limit,
+          take: limit,
+        }),
+        db.dentist.count({ where }),
+      ])
+    },
+    [key],
+    { tags: [TAGS.dentists] },
+  )()
+}
 
 export function getCachedAdminDentist(id: string) {
   return unstable_cache(
@@ -75,23 +94,70 @@ export const getCachedServices = unstable_cache(
 
 // ─── Admin – serviços ─────────────────────────────────────────────────────────
 
-export const getCachedAdminServices = unstable_cache(
-  () =>
-    db.service.findMany({
-      orderBy: { position: 'asc' },
-      include: { images: { orderBy: { position: 'asc' } } },
-    }),
-  ['admin-services'],
-  { tags: [TAGS.services] },
-)
+interface ServiceParams {
+  page: number
+}
+
+export function getCachedAdminServices(params: ServiceParams) {
+  const key = `admin-services-${JSON.stringify(params)}`
+  return unstable_cache(
+    () => {
+      const limit = 10
+      return Promise.all([
+        db.service.findMany({
+          orderBy: { position: 'asc' },
+          include: { images: { orderBy: { position: 'asc' } } },
+          skip: (params.page - 1) * limit,
+          take: limit,
+        }),
+        db.service.count(),
+      ])
+    },
+    [key],
+    { tags: [TAGS.services] },
+  )()
+}
 
 // ─── Admin – depoimentos ──────────────────────────────────────────────────────
 
-export const getCachedAdminTestimonials = unstable_cache(
-  () => db.testimonial.findMany({ orderBy: { createdAt: 'desc' } }),
-  ['admin-testimonials'],
-  { tags: [TAGS.testimonials] },
-)
+interface TestimonialParams {
+  page: number
+  filter?: string   // all | pending | approved | rejected
+  search?: string
+}
+
+export function getCachedAdminTestimonials(params: TestimonialParams) {
+  const key = `admin-testimonials-${JSON.stringify(params)}`
+  return unstable_cache(
+    () => {
+      const limit = 10
+      const where: any = {}
+      if (params.filter === 'pending')  { where.approved = false; where.rejected = false }
+      if (params.filter === 'approved') { where.approved = true }
+      if (params.filter === 'rejected') { where.rejected = true }
+      if (params.search) {
+        where.OR = [
+          { patientName: { contains: params.search } },
+          { text: { contains: params.search } },
+        ]
+      }
+      return Promise.all([
+        db.testimonial.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip: (params.page - 1) * limit,
+          take: limit,
+        }),
+        db.testimonial.count({ where }),
+        // counts for tab badges (always global)
+        db.testimonial.count({ where: { approved: false, rejected: false } }),
+        db.testimonial.count({ where: { rejected: true } }),
+      ])
+    },
+    [key],
+    { tags: [TAGS.testimonials] },
+  )()
+}
 
 // ─── Admin – agendamentos ─────────────────────────────────────────────────────
 
@@ -243,11 +309,33 @@ export const getCachedStats = unstable_cache(
 
 // ─── Admin – páginas ──────────────────────────────────────────────────────────
 
-export const getCachedAdminPages = unstable_cache(
-  () => db.page.findMany({ orderBy: { updatedAt: 'desc' } }),
-  ['admin-pages'],
-  { tags: [TAGS.pages] },
-)
+interface PageParams {
+  page: number
+  search?: string
+}
+
+export function getCachedAdminPages(params: PageParams) {
+  const key = `admin-pages-${JSON.stringify(params)}`
+  return unstable_cache(
+    () => {
+      const limit = 10
+      const where: any = params.search
+        ? { OR: [{ title: { contains: params.search } }, { slug: { contains: params.search } }] }
+        : {}
+      return Promise.all([
+        db.page.findMany({
+          where,
+          orderBy: { updatedAt: 'desc' },
+          skip: (params.page - 1) * limit,
+          take: limit,
+        }),
+        db.page.count({ where }),
+      ])
+    },
+    [key],
+    { tags: [TAGS.pages] },
+  )()
+}
 
 export function getCachedPageBySlug(slug: string) {
   return unstable_cache(

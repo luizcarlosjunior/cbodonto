@@ -16,12 +16,22 @@ const schema = z.object({
   position: z.number().int().default(0),
 })
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-  const services = await getCachedAdminServices()
-  return NextResponse.json(services)
+  const { searchParams } = req.nextUrl
+  const page = Math.max(1, Number(searchParams.get('page') ?? '1'))
+
+  const [services, total] = await getCachedAdminServices({ page })
+
+  const perPage = 10
+  return NextResponse.json({
+    services,
+    total,
+    page,
+    pages: Math.max(1, Math.ceil(total / perPage)),
+  })
 }
 
 export async function POST(req: NextRequest) {

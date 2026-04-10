@@ -8,6 +8,21 @@ import { TAGS } from '@/lib/cache'
 
 type Params = { params: { id: string } }
 
+export async function GET(_: NextRequest, { params }: Params) {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+
+  const appointment = await db.appointment.findUnique({
+    where: { id: params.id },
+    include: {
+      dentist: { select: { id: true, name: true } },
+      patient: { select: { id: true, name: true, phone: true, email: true } },
+    },
+  })
+  if (!appointment) return NextResponse.json({ error: 'Não encontrado' }, { status: 404 })
+  return NextResponse.json(appointment)
+}
+
 export async function PATCH(req: NextRequest, { params }: Params) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })

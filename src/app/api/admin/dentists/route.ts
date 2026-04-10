@@ -19,12 +19,23 @@ const schema = z.object({
   active: z.boolean().default(true),
 })
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-  const dentists = await getCachedAdminDentists()
-  return NextResponse.json(dentists)
+  const { searchParams } = req.nextUrl
+  const page   = Math.max(1, Number(searchParams.get('page') ?? '1'))
+  const search = searchParams.get('search') ?? ''
+
+  const [dentists, total] = await getCachedAdminDentists({ page, search: search || undefined })
+
+  const perPage = 12
+  return NextResponse.json({
+    dentists,
+    total,
+    page,
+    pages: Math.max(1, Math.ceil(total / perPage)),
+  })
 }
 
 export async function POST(req: NextRequest) {

@@ -1,7 +1,8 @@
 'use client'
 // src/app/admin/(protected)/paginas/page.tsx
-import { useState, useEffect, useCallback } from 'react'
-import { Plus, X, Trash2, Pencil, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Plus, X, Trash2, Pencil, Eye, EyeOff, ChevronDown, ChevronUp, Search } from 'lucide-react'
+import Pagination from '@/components/admin/Pagination'
 import dynamic from 'next/dynamic'
 import Switch from '@/components/admin/Switch'
 
@@ -222,21 +223,110 @@ function PageModal({ initial, onClose, onSave }: ModalProps) {
   )
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Delete confirm modal ─────────────────────────────────────────────────────
 
-export default function PaginasPage() {
-  const [pages, setPages] = useState<Page[]>([])
-  const [loading, setLoading] = useState(true)
-  const [modal, setModal] = useState<{ open: boolean; data?: Page }>({ open: false })
+interface DeleteConfirmProps {
+  title: string
+  onConfirm: () => void
+  onCancel: () => void
+}
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    const res = await fetch('/api/admin/pages')
-    if (res.ok) setPages(await res.json())
-    setLoading(false)
+function DeleteConfirmModal({ title, onConfirm, onCancel }: DeleteConfirmProps) {
+  const [countdown, setCountdown] = useState(3)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) { clearInterval(intervalRef.current!); return 0 }
+        return c - 1
+      })
+    }, 1000)
+    return () => clearInterval(intervalRef.current!)
   }, [])
 
-  useEffect(() => { load() }, [load])
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div className="bg-white w-full max-w-sm shadow-xl p-6">
+        <div className="flex items-start gap-4 mb-5">
+          <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+            <Trash2 size={18} className="text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-serif text-lg text-stone-900 leading-tight">Excluir página</h3>
+            <p className="text-stone-500 text-sm mt-1">
+              Tem certeza que deseja excluir permanentemente a página{' '}
+              <strong className="text-stone-700">"{title}"</strong>?
+              Esta ação não pode ser desfeita.
+            </p>
+          </div>
+        </div>
+        <div className="flex justify-end gap-3">
+          <button onClick={onCancel} className="btn-outline">Cancelar</button>
+          <button
+            onClick={onConfirm}
+            disabled={countdown > 0}
+            className={`inline-flex items-center gap-2 px-5 py-2.5 text-xs tracking-widest uppercase font-medium transition-colors rounded-sm ${
+              countdown > 0
+                ? 'bg-red-200 text-red-400 cursor-not-allowed'
+                : 'bg-red-600 hover:bg-red-700 text-white'
+            }`}
+          >
+            {countdown > 0 ? (
+              <>
+                <span className="w-4 h-4 rounded-full border-2 border-red-400 flex items-center justify-center text-[0.6rem] font-bold leading-none">
+                  {countdown}
+                </span>
+                Excluir
+              </>
+            ) : (
+              <>
+                <Trash2 size={13} />
+                Excluir
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+const PER_PAGE = 10
+
+export default function PaginasPage() {
+  const [pageItems, setPageItems] = useState<Page[]>([])
+  const [total, setTotal]     = useState(0)
+  const [page, setPage]       = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(true)
+  const [modal, setModal] = useState<{ open: boolean; data?: Page }>({ open: false })
+  const [deleteTarget, setDeleteTarget] = useState<Page | null>(null)
+  const [search, setSearch] = useState('')
+
+  const load = useCallback(async (pg = page) => {
+    setLoading(true)
+    const params = new URLSearchParams({
+      page: String(pg),
+      ...(search ? { search } : {}),
+    })
+    const res = await fetch(`/api/admin/pages?${params}`)
+    if (res.ok) {
+      const data = await res.json()
+      setPageItems(data.pages)
+      setTotal(data.total)
+      setPage(data.page)
+      setTotalPages(data.totalPages)
+    }
+    setLoading(false)
+  }, [search, page])
+
+  useEffect(() => { load(1) }, [search]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load() }, [page])    // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSearchChange = (v: string) => { setSearch(v); setPage(1) }
 
   const toggleActive = async (p: Page) => {
     await fetch(`/api/admin/pages/${p.id}`, {
@@ -247,9 +337,10 @@ export default function PaginasPage() {
     load()
   }
 
-  const remove = async (id: string) => {
-    if (!confirm('Excluir esta página permanentemente?')) return
-    await fetch(`/api/admin/pages/${id}`, { method: 'DELETE' })
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    await fetch(`/api/admin/pages/${deleteTarget.id}`, { method: 'DELETE' })
+    setDeleteTarget(null)
     load()
   }
 
@@ -262,7 +353,7 @@ export default function PaginasPage() {
         <div>
           <h1 className="font-serif text-3xl text-stone-900">Páginas</h1>
           <p className="text-stone-500 text-sm mt-0.5">
-            {pages.length} página{pages.length !== 1 ? 's' : ''} · {pages.filter((p) => p.active).length} ativa{pages.filter((p) => p.active).length !== 1 ? 's' : ''}
+            {total} página{total !== 1 ? 's' : ''}
           </p>
         </div>
         <button onClick={() => setModal({ open: true })} className="btn-primary">
@@ -270,17 +361,35 @@ export default function PaginasPage() {
         </button>
       </div>
 
+      {/* Search */}
+      <div className="relative mb-4">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          placeholder="Buscar por título ou slug..."
+          className="w-full pl-9 pr-4 py-2.5 text-sm border border-stone-200 focus:outline-none focus:border-burgundy bg-white"
+        />
+        {search && (
+          <button onClick={() => handleSearchChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
       {loading ? (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-stone-200 rounded animate-pulse" />)}
         </div>
-      ) : pages.length === 0 ? (
+      ) : pageItems.length === 0 ? (
         <div className="bg-white border border-stone-200 p-10 text-center text-stone-400">
-          Nenhuma página cadastrada.
+          {search ? `Nenhum resultado para "${search}".` : 'Nenhuma página cadastrada.'}
         </div>
       ) : (
+        <>
         <div className="space-y-2">
-          {pages.map((p) => (
+          {pageItems.map((p) => (
             <div
               key={p.id}
               className={[
@@ -325,7 +434,7 @@ export default function PaginasPage() {
                   <Pencil size={14} />
                 </button>
                 <button
-                  onClick={() => remove(p.id)}
+                  onClick={() => setDeleteTarget(p)}
                   className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-sm transition-colors"
                   title="Excluir"
                 >
@@ -335,6 +444,15 @@ export default function PaginasPage() {
             </div>
           ))}
         </div>
+
+        <Pagination
+          page={page}
+          pages={totalPages}
+          total={total}
+          perPage={PER_PAGE}
+          onPage={(p) => setPage(p)}
+        />
+        </>
       )}
 
       {modal.open && (
@@ -342,6 +460,14 @@ export default function PaginasPage() {
           initial={modal.data}
           onClose={() => setModal({ open: false })}
           onSave={() => { setModal({ open: false }); load() }}
+        />
+      )}
+
+      {deleteTarget && (
+        <DeleteConfirmModal
+          title={deleteTarget.title}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
         />
       )}
     </div>

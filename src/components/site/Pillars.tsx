@@ -24,7 +24,7 @@ export default function Pillars() {
     <section className="bg-stone-900 py-20">
       <div className="max-w-[1600px] mx-auto px-[8%]">
       <div className="mb-10">
-        <p className="section-tag mb-3" style={{ color: '#c4a97d' }}>
+        <p className="section-tag mb-3" style={{ color: '#21A8A0' }}>
           <span className="block w-7 h-px bg-gold mr-2 flex-shrink-0" />
           O que esperar dos resultados
         </p>

@@ -10,22 +10,17 @@ const tags = [
 
 export default function About({ waNumber }: { waNumber: string }) {
   return (
-    <section id="sobre" className="py-20">
+    <section id="sobre" className="py-20 bg-cream-dark">
       <div className="max-w-[1600px] mx-auto px-[8%]">
       <div className="grid md:grid-cols-2 gap-16 items-center">
         {/* Image */}
         <div className="relative">
           <div className="absolute -top-5 -left-5 -right-5 -bottom-5 border border-gold/30 rounded-sm -z-10" />
           <img
-            src="/dentistas.png"
+            src="/dentistas.webp"
             alt="Dra. Samara Z. Barcellos e Dr. Samuel Campozano"
             className="w-full object-cover rounded-sm"
           />
-          <div className="absolute -bottom-5 -right-5 bg-burgundy text-white px-7 py-5 text-center">
-            <p className="text-[0.62rem] tracking-widest uppercase opacity-80 mt-1.5">
-              CB Odonto
-            </p>
-          </div>
         </div>
 
         {/* Content */}

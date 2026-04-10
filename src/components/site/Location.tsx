@@ -21,7 +21,7 @@ export default function Location({ settings }: LocationProps) {
     <section id="localizacao" className="bg-stone-900">
       <div className="max-w-[1600px] mx-auto grid md:grid-cols-2 min-h-[480px]">
       <div className="py-16 px-[8%] flex flex-col justify-center">
-        <p className="section-tag mb-4" style={{ color: '#c4a97d' }}>Onde nos encontrar</p>
+        <p className="section-tag mb-4" style={{ color: '#21A8A0' }}>Onde nos encontrar</p>
         <h2 className="font-serif text-4xl font-light text-white mb-8">
           Venha nos <em className="italic text-gold">visitar</em>
         </h2>
