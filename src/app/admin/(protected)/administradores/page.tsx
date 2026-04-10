@@ -1,7 +1,7 @@
 'use client'
 // src/app/admin/(protected)/administradores/page.tsx
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Plus, Pencil, Trash2, KeyRound, ShieldCheck, Shield } from 'lucide-react'
+import { Plus, Pencil, Trash2, KeyRound, ShieldCheck, Shield, Eye, EyeOff, RefreshCw } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 
 interface AdminUser {
@@ -74,8 +74,17 @@ function UserModal({
     password: '',
     confirmPassword: '',
   })
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  const generatePassword = () => {
+    const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%'
+    const pwd = Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+    setForm((f) => ({ ...f, password: pwd, confirmPassword: pwd }))
+    setShowPassword(true)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -150,24 +159,52 @@ function UserModal({
           {isNew && (
             <>
               <div>
-                <label className="text-[0.65rem] text-stone-400 block mb-1">Senha *</label>
-                <input
-                  required
-                  type="password"
-                  value={form.password}
-                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                  className="w-full border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:border-burgundy"
-                />
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[0.65rem] text-stone-400">Senha *</label>
+                  <button
+                    type="button"
+                    onClick={generatePassword}
+                    className="inline-flex items-center gap-1 text-[0.65rem] text-burgundy hover:text-burgundy/70 transition-colors"
+                  >
+                    <RefreshCw size={10} />
+                    Gerar senha
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    required
+                    type={showPassword ? 'text' : 'password'}
+                    value={form.password}
+                    onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                    className="w-full border border-stone-200 px-3 py-2 pr-9 text-sm focus:outline-none focus:border-burgundy"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="text-[0.65rem] text-stone-400 block mb-1">Confirmar Senha *</label>
-                <input
-                  required
-                  type="password"
-                  value={form.confirmPassword}
-                  onChange={(e) => setForm((f) => ({ ...f, confirmPassword: e.target.value }))}
-                  className="w-full border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:border-burgundy"
-                />
+                <div className="relative">
+                  <input
+                    required
+                    type={showConfirm ? 'text' : 'password'}
+                    value={form.confirmPassword}
+                    onChange={(e) => setForm((f) => ({ ...f, confirmPassword: e.target.value }))}
+                    className="w-full border border-stone-200 px-3 py-2 pr-9 text-sm focus:outline-none focus:border-burgundy"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((v) => !v)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                  >
+                    {showConfirm ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
               </div>
             </>
           )}

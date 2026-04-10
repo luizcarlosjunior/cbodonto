@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -93,6 +94,15 @@ export default function LoginPage() {
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
+
+          <div className="text-center">
+            <Link
+              href="/admin/esqueci-senha"
+              className="text-stone-500 hover:text-stone-300 text-xs transition-colors"
+            >
+              Esqueci minha senha
+            </Link>
+          </div>
         </form>
 
         <p className="text-center text-stone-700 text-xs mt-6 tracking-wide">
