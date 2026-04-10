@@ -18,7 +18,8 @@ export default function Location({ settings }: LocationProps) {
     : settings.addressLine1 || 'R. Casemiro de Abreu, 238 – Maracanã\nColombo – PR, 83409-070'
 
   return (
-    <section id="localizacao" className="bg-stone-900 grid md:grid-cols-2 min-h-[480px]">
+    <section id="localizacao" className="bg-stone-900">
+      <div className="max-w-[1600px] mx-auto grid md:grid-cols-2 min-h-[480px]">
       <div className="py-16 px-[8%] flex flex-col justify-center">
         <p className="section-tag mb-4" style={{ color: '#c4a97d' }}>Onde nos encontrar</p>
         <h2 className="font-serif text-4xl font-light text-white mb-8">
@@ -90,6 +91,7 @@ export default function Location({ settings }: LocationProps) {
           title="CB Odonto – Localização"
           style={{ filter: 'grayscale(20%) contrast(1.05)' }}
         />
+      </div>
       </div>
     </section>
   )

@@ -29,7 +29,8 @@ const photos = [
 
 export default function Clinic() {
   return (
-    <section id="clinica" className="py-20 px-[8%] bg-white overflow-hidden">
+    <section id="clinica" className="py-20 bg-white overflow-hidden">
+      <div className="max-w-[1600px] mx-auto px-[8%]">
       <div className="text-center mb-14">
         <p className="section-tag justify-center mb-3">Conheça nosso espaço</p>
         <h2 className="section-title">
@@ -87,6 +88,7 @@ export default function Clinic() {
             "Cada detalhe foi pensado para que você se sinta acolhido e seguro desde o momento em que entra pela nossa porta."
           </blockquote>
         </div>
+      </div>
       </div>
     </section>
   )

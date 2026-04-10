@@ -51,7 +51,7 @@ export default async function SlugPage({ params }: { params: { slug: string } })
 
   return (
     <>
-      <Navbar waNumber={waNumber} />
+      <Navbar waNumber={waNumber} forceLight instagramUrl={settings.instagramUrl} facebookUrl={settings.facebookUrl} />
 
       <main className="min-h-screen bg-cream pt-24 pb-20">
         <div className="max-w-3xl mx-auto px-[5%]">

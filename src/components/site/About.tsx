@@ -10,7 +10,8 @@ const tags = [
 
 export default function About({ waNumber }: { waNumber: string }) {
   return (
-    <section id="sobre" className="py-20 px-[8%]">
+    <section id="sobre" className="py-20">
+      <div className="max-w-[1600px] mx-auto px-[8%]">
       <div className="grid md:grid-cols-2 gap-16 items-center">
         {/* Image */}
         <div className="relative">
@@ -51,7 +52,7 @@ export default function About({ waNumber }: { waNumber: string }) {
             {tags.map((t) => (
               <span
                 key={t}
-                className="text-[0.68rem] tracking-widest uppercase border border-gold/40 text-stone-500 px-3 py-1.5 rounded-sm"
+                className="w-full sm:w-auto text-center text-[0.68rem] tracking-widest uppercase border border-gold/40 text-stone-500 px-3 py-1.5 rounded-sm"
               >
                 {t}
               </span>
@@ -61,11 +62,12 @@ export default function About({ waNumber }: { waNumber: string }) {
             href={waLink(waNumber, 'Olá, vim do site! Quero agendar minha primeira consulta.')}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary"
+            className="btn-primary w-full sm:w-auto justify-center"
           >
             Agendar Minha Consulta →
           </a>
         </div>
+      </div>
       </div>
     </section>
   )

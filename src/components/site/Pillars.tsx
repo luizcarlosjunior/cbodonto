@@ -21,7 +21,8 @@ const pillars = [
 
 export default function Pillars() {
   return (
-    <section className="bg-stone-900 py-20 px-[8%]">
+    <section className="bg-stone-900 py-20">
+      <div className="max-w-[1600px] mx-auto px-[8%]">
       <div className="mb-10">
         <p className="section-tag mb-3" style={{ color: '#c4a97d' }}>
           <span className="block w-7 h-px bg-gold mr-2 flex-shrink-0" />
@@ -49,6 +50,7 @@ export default function Pillars() {
             <p className="text-stone-400 text-sm leading-relaxed">{desc}</p>
           </div>
         ))}
+      </div>
       </div>
     </section>
   )

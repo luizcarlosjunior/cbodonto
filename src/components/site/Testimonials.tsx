@@ -2,8 +2,9 @@
 // src/components/site/Testimonials.tsx
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import type { Testimonial } from '@prisma/client'
+import TestimonialForm from '@/components/site/TestimonialForm'
 
 interface Props {
   testimonials: Testimonial[]
@@ -13,6 +14,7 @@ const INTERVAL_MS = 10_000
 const ANIM_MS = 320
 
 export default function Testimonials({ testimonials }: Props) {
+  const [modalOpen, setModalOpen] = useState(false)
   const count = testimonials.length
 
   // idxRef keeps the "truth" so interval/prev/next closures never go stale
@@ -51,7 +53,9 @@ export default function Testimonials({ testimonials }: Props) {
   const t = testimonials[idx]
 
   return (
-    <section id="depoimentos" className="py-20 px-[8%] bg-cream-dark">
+    <>
+    <section id="depoimentos" className="py-20 bg-cream-dark">
+      <div className="max-w-[1600px] mx-auto px-[8%]">
       <div className="text-center mb-12">
         <p className="section-tag justify-center mb-3">O que dizem nossos pacientes</p>
         <h2 className="section-title">
@@ -162,12 +166,48 @@ export default function Testimonials({ testimonials }: Props) {
         )}
       </div>
 
+      {/* Subtle link */}
+      <div className="text-center mt-8">
+        <button
+          onClick={() => setModalOpen(true)}
+          className="text-stone-400 text-xs tracking-wide hover:text-burgundy transition-colors underline underline-offset-4 decoration-dotted"
+        >
+          deixe aqui o seu depoimento...
+        </button>
+      </div>
+
       <style>{`
         @keyframes progress {
           from { transform: scaleX(0); }
           to   { transform: scaleX(1); }
         }
       `}</style>
+      </div>
     </section>
+
+    {/* Modal */}
+    {modalOpen && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        onClick={() => setModalOpen(false)}
+      >
+        <div
+          className="bg-white w-full max-w-lg shadow-2xl max-h-[92vh] overflow-y-auto rounded-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 sticky top-0 bg-white z-10">
+            <div>
+              <h2 className="font-serif text-lg text-stone-900">Deixe seu depoimento</h2>
+              <p className="text-stone-400 text-xs mt-0.5">Sua opinião nos ajuda a melhorar sempre</p>
+            </div>
+            <button onClick={() => setModalOpen(false)} className="text-stone-400 hover:text-stone-600 transition-colors">
+              <X size={18} />
+            </button>
+          </div>
+          <TestimonialForm onSuccess={() => setTimeout(() => setModalOpen(false), 2500)} />
+        </div>
+      </div>
+    )}
+    </>
   )
 }

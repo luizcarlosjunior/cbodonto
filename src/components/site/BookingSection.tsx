@@ -1,6 +1,7 @@
 'use client'
 // src/components/site/BookingSection.tsx
 import { useState } from 'react'
+import Image from 'next/image'
 import { SERVICES, DAY_NAMES_SHORT } from '@/lib/utils'
 import type { Dentist, WeeklySchedule } from '@prisma/client'
 
@@ -53,7 +54,8 @@ export default function BookingSection({ dentists }: Props) {
   }
 
   return (
-    <section id="agendamento" className="bg-stone-900 py-20 px-[8%]">
+    <section id="agendamento" className="bg-stone-900 py-20">
+      <div className="max-w-[1600px] mx-auto px-[8%]">
       <div className="grid md:grid-cols-2 gap-14 items-start">
         {/* Left */}
         <div>
@@ -70,8 +72,12 @@ export default function BookingSection({ dentists }: Props) {
           <div className="space-y-4">
             {dentists.map((d) => (
               <div key={d.id} className="flex items-start gap-4 p-4 border border-gold/10 bg-white/5">
-                <div className="w-10 h-10 rounded-full bg-burgundy/30 border border-burgundy/50 flex items-center justify-center text-white font-serif text-lg shrink-0">
-                  {d.name.charAt(d.name.indexOf('.') + 2)}
+                <div className="w-10 h-10 rounded-full border border-burgundy/50 overflow-hidden shrink-0 bg-burgundy/30 flex items-center justify-center">
+                  {d.photoUrl ? (
+                    <Image src={d.photoUrl} alt={d.name} width={40} height={40} className="object-cover w-full h-full" unoptimized />
+                  ) : (
+                    <span className="text-white font-serif text-lg">{d.name.charAt(d.name.indexOf('.') + 2)}</span>
+                  )}
                 </div>
                 <div>
                   <p className="text-white text-sm font-medium">{d.name}</p>
@@ -229,6 +235,7 @@ export default function BookingSection({ dentists }: Props) {
             </form>
           )}
         </div>
+      </div>
       </div>
     </section>
   )

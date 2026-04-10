@@ -149,7 +149,8 @@ export default function Services({ waNumber, services }: Props) {
 
   return (
     <>
-      <section id="servicos" className="bg-white py-20 px-[8%]">
+      <section id="servicos" className="bg-white py-20">
+        <div className="max-w-[1600px] mx-auto px-[8%]">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
           <div>
             <p className="section-tag mb-3">Os mais procurados</p>
@@ -221,6 +222,7 @@ export default function Services({ waNumber, services }: Props) {
             </button>
           </div>
         )}
+        </div>
       </section>
 
       {selected && (
