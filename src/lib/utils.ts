@@ -12,6 +12,7 @@ export const DAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'S
 export const DAY_NAMES_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
 export const SERVICES = [
+  'Consulta / Outros',
   'Consulta Geral',
   'Limpeza Dental',
   'Restauração em Resina',

@@ -26,13 +26,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     // Handle weekly schedule update
     if (body.weeklySchedule !== undefined) {
-      const schedules: Array<{ dayOfWeek: number; startTime: string; endTime: string; active: boolean }> = body.weeklySchedule
+      const schedules: Array<{ dayOfWeek: number; startTime: string; endTime: string; slots?: string; active: boolean }> = body.weeklySchedule
 
       for (const s of schedules) {
         await db.weeklySchedule.upsert({
           where: { dentistId_dayOfWeek: { dentistId: params.id, dayOfWeek: s.dayOfWeek } },
-          update: { startTime: s.startTime, endTime: s.endTime, active: s.active },
-          create: { dentistId: params.id, dayOfWeek: s.dayOfWeek, startTime: s.startTime, endTime: s.endTime, active: s.active },
+          update: { startTime: s.startTime, endTime: s.endTime, slots: s.slots ?? null, active: s.active },
+          create: { dentistId: params.id, dayOfWeek: s.dayOfWeek, startTime: s.startTime, endTime: s.endTime, slots: s.slots ?? null, active: s.active },
         })
       }
       const updated = await db.dentist.findUnique({

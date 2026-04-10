@@ -4,12 +4,52 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Plus, Trash2, Save, AlertTriangle } from 'lucide-react'
 import Switch from '@/components/admin/Switch'
-import { DAY_NAMES, formatDate } from '@/lib/utils'
+import { DAY_NAMES, formatDate, cn } from '@/lib/utils'
 import Link from 'next/link'
+
+// Same slots shown to the client on the public booking form
+const ALL_SLOTS = [
+  '08:00','08:30','09:00','09:30','10:00','10:30',
+  '11:00','11:30','13:00','13:30','14:00','14:30',
+  '15:00','15:30','16:00','16:30','17:00','17:30',
+]
 
 const TIMES = Array.from({ length: 24 }, (_, h) =>
   [`${String(h).padStart(2,'0')}:00`, `${String(h).padStart(2,'0')}:30`]
 ).flat()
+
+function toMins(t: string) {
+  const [h, m] = t.split(':').map(Number)
+  return h * 60 + m
+}
+
+function addThirtyMin(t: string): string {
+  const total = toMins(t) + 30
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
+}
+
+/** Derive selected slots from a startTime–endTime range */
+function slotsFromRange(startTime: string, endTime: string): string[] {
+  if (!startTime || !endTime) return []
+  const s = toMins(startTime)
+  const e = toMins(endTime)
+  return ALL_SLOTS.filter((slot) => toMins(slot) >= s && toMins(slot) < e)
+}
+
+/** Compute startTime / endTime from an ordered selection of slots */
+function rangeFromSlots(slots: string[]): { startTime: string; endTime: string } {
+  if (slots.length === 0) return { startTime: '08:00', endTime: '18:00' }
+  const sorted = [...slots].sort((a, b) => toMins(a) - toMins(b))
+  return { startTime: sorted[0], endTime: addThirtyMin(sorted[sorted.length - 1]) }
+}
+
+// ─── Schedule row state ────────────────────────────────────────────────────────
+
+interface DaySchedule {
+  dayOfWeek: number
+  active: boolean
+  slots: string[]   // selected 30-min blocks
+}
 
 export default function DentistSchedulePage() {
   const { id } = useParams<{ id: string }>()
@@ -17,7 +57,7 @@ export default function DentistSchedulePage() {
   const [dentist, setDentist] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [schedules, setSchedules] = useState<any[]>([])
+  const [schedules, setSchedules] = useState<DaySchedule[]>([])
   const [unavailables, setUnavailables] = useState<any[]>([])
   const [msg, setMsg] = useState('')
   const [newUnavail, setNewUnavail] = useState({ date: '', startTime: '', endTime: '', reason: '' })
@@ -29,14 +69,19 @@ export default function DentistSchedulePage() {
     if (!res.ok) { router.push('/admin/dentistas'); return }
     const data = await res.json()
     setDentist(data)
-    // Build 7-day schedule grid
-    const grid = [1,2,3,4,5,6,0].map((day) => {
+
+    const grid: DaySchedule[] = [1,2,3,4,5,6,0].map((day) => {
       const existing = data.weeklySchedule?.find((s: any) => s.dayOfWeek === day)
+      // Prefer the granular `slots` field if present; fall back to deriving from range
+      const loadedSlots = existing?.active
+        ? (existing.slots
+            ? existing.slots.split(',').filter(Boolean)
+            : slotsFromRange(existing.startTime ?? '08:00', existing.endTime ?? '18:00'))
+        : []
       return {
         dayOfWeek: day,
-        startTime: existing?.startTime ?? '08:00',
-        endTime: existing?.endTime ?? '18:00',
         active: existing?.active ?? false,
+        slots: loadedSlots,
       }
     })
     setSchedules(grid)
@@ -46,17 +91,37 @@ export default function DentistSchedulePage() {
 
   useEffect(() => { fetchDentist() }, [id])
 
-  const updateScheduleField = (dayOfWeek: number, field: string, value: any) => {
-    setSchedules((prev) => prev.map((s) => s.dayOfWeek === dayOfWeek ? { ...s, [field]: value } : s))
+  const toggleActive = (dayOfWeek: number, active: boolean) => {
+    setSchedules((prev) => prev.map((s) =>
+      s.dayOfWeek === dayOfWeek
+        ? { ...s, active, slots: active && s.slots.length === 0
+            ? slotsFromRange('08:00', '18:00')  // default full day on first activation
+            : s.slots }
+        : s
+    ))
+  }
+
+  const toggleSlot = (dayOfWeek: number, slot: string) => {
+    setSchedules((prev) => prev.map((s) => {
+      if (s.dayOfWeek !== dayOfWeek) return s
+      const has = s.slots.includes(slot)
+      return { ...s, slots: has ? s.slots.filter((x) => x !== slot) : [...s.slots, slot] }
+    }))
   }
 
   const saveSchedules = async () => {
     setSaving(true)
     setMsg('')
+    // Convert slots → startTime/endTime range + save exact slots CSV
+    const payload = schedules.map((s) => {
+      const { startTime, endTime } = rangeFromSlots(s.slots)
+      const sorted = [...s.slots].sort((a, b) => toMins(a) - toMins(b))
+      return { dayOfWeek: s.dayOfWeek, active: s.active, startTime, endTime, slots: sorted.join(',') }
+    })
     const res = await fetch(`/api/admin/dentists/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ weeklySchedule: schedules }),
+      body: JSON.stringify({ weeklySchedule: payload }),
     })
     setSaving(false)
     setMsg(res.ok ? 'Horários salvos com sucesso!' : 'Erro ao salvar.')
@@ -102,12 +167,14 @@ export default function DentistSchedulePage() {
         </div>
       </div>
 
-      {/* Weekly schedule */}
+      {/* ── Weekly schedule ──────────────────────────────────────────────── */}
       <div className="bg-white border border-stone-200 p-6 mb-6">
         <div className="flex items-center justify-between mb-5">
           <div>
             <h2 className="font-serif text-xl text-stone-900">Disponibilidade Semanal</h2>
-            <p className="text-stone-400 text-xs mt-0.5">Configure os horários de atendimento por dia da semana.</p>
+            <p className="text-stone-400 text-xs mt-0.5">
+              Ative os dias e selecione os horários disponíveis — os mesmos blocos que o paciente verá ao agendar.
+            </p>
           </div>
           <button onClick={saveSchedules} disabled={saving} className="btn-primary gap-2">
             <Save size={13} />
@@ -116,54 +183,76 @@ export default function DentistSchedulePage() {
         </div>
 
         {msg && (
-          <div className={`mb-4 px-4 py-2.5 text-sm border rounded-sm ${msg.includes('sucesso') ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
+          <div className={cn(
+            'mb-4 px-4 py-2.5 text-sm border rounded-sm',
+            msg.includes('sucesso') ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'
+          )}>
             {msg}
           </div>
         )}
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {schedules.map((s) => (
-            <div key={s.dayOfWeek} className={`grid grid-cols-[120px_1fr_1fr_80px] gap-3 items-center p-3 rounded-sm border transition-colors ${s.active ? 'border-burgundy/20 bg-burgundy/5' : 'border-stone-100 bg-stone-50'}`}>
-              <div className="flex items-center gap-2">
+            <div
+              key={s.dayOfWeek}
+              className={cn(
+                'border rounded-sm p-4 transition-colors',
+                s.active ? 'border-burgundy/20 bg-burgundy/5' : 'border-stone-100 bg-stone-50'
+              )}
+            >
+              {/* Day header */}
+              <div className="flex items-center gap-3 mb-3">
                 <Switch
                   checked={s.active}
-                  onChange={(v) => updateScheduleField(s.dayOfWeek, 'active', v)}
+                  onChange={(v) => toggleActive(s.dayOfWeek, v)}
                 />
-                <span className={`text-sm font-medium ${s.active ? 'text-stone-800' : 'text-stone-400'}`}>
+                <span className={cn('text-sm font-medium w-20', s.active ? 'text-stone-800' : 'text-stone-400')}>
                   {DAY_NAMES[s.dayOfWeek]}
                 </span>
+                {s.active && s.slots.length > 0 && (
+                  <span className="text-[0.65rem] text-stone-400 ml-1">
+                    {s.slots.length} horário{s.slots.length !== 1 ? 's' : ''}
+                    {' · '}
+                    {(() => { const { startTime, endTime } = rangeFromSlots(s.slots); return `${startTime} – ${endTime}` })()}
+                  </span>
+                )}
+                {s.active && s.slots.length === 0 && (
+                  <span className="text-[0.65rem] text-amber-500">Nenhum horário selecionado</span>
+                )}
+                {!s.active && (
+                  <span className="text-[0.65rem] text-stone-400">Fechado</span>
+                )}
               </div>
-              <div>
-                <label className="text-[0.65rem] text-stone-400 block mb-0.5">Início</label>
-                <select
-                  disabled={!s.active}
-                  value={s.startTime}
-                  onChange={(e) => updateScheduleField(s.dayOfWeek, 'startTime', e.target.value)}
-                  className="border border-stone-200 px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-burgundy disabled:opacity-40 w-24"
-                >
-                  {TIMES.map((t) => <option key={t}>{t}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-[0.65rem] text-stone-400 block mb-0.5">Fim</label>
-                <select
-                  disabled={!s.active}
-                  value={s.endTime}
-                  onChange={(e) => updateScheduleField(s.dayOfWeek, 'endTime', e.target.value)}
-                  className="border border-stone-200 px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-burgundy disabled:opacity-40 w-24"
-                >
-                  {TIMES.map((t) => <option key={t}>{t}</option>)}
-                </select>
-              </div>
-              <div className="text-xs text-stone-400 text-center">
-                {s.active ? `${s.startTime}–${s.endTime}` : 'Fechado'}
-              </div>
+
+              {/* Slot grid */}
+              {s.active && (
+                <div className="flex flex-wrap gap-1.5">
+                  {ALL_SLOTS.map((slot) => {
+                    const selected = s.slots.includes(slot)
+                    return (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => toggleSlot(s.dayOfWeek, slot)}
+                        className={cn(
+                          'px-3 py-1.5 text-xs font-medium border transition-all rounded-sm',
+                          selected
+                            ? 'bg-burgundy border-burgundy text-white'
+                            : 'border-stone-200 bg-white text-stone-500 hover:border-burgundy hover:text-burgundy'
+                        )}
+                      >
+                        {slot}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Unavailable dates */}
+      {/* ── Unavailable dates ─────────────────────────────────────────────── */}
       <div className="bg-white border border-stone-200 p-6">
         <div className="flex items-center gap-2 mb-1">
           <AlertTriangle size={16} className="text-amber-500" />
