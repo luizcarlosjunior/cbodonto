@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   Settings,
+  ShieldCheck,
   Star,
   Stethoscope,
   UserCog,
@@ -28,6 +29,7 @@ const nav = [
   { href: '/admin/servicos', label: 'Serviços', icon: Stethoscope },
   { href: '/admin/depoimentos', label: 'Depoimentos', icon: Star },
   { href: '/admin/paginas', label: 'Páginas', icon: FileText },
+  { href: '/admin/administradores', label: 'Administradores', icon: ShieldCheck },
   { href: '/admin/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
